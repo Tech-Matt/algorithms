@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define N 3
 #define MAX_VAL 10
@@ -56,6 +57,86 @@ void print_matrix(int matrix[][N]) {
     printf("\n\n");
 }
 
+// Returns the minimum number from an array of integers with n lenght of the array
+int min(int *array, int n) {
+    int min = 0;
+    min = array[0];
+    for(int i = 0; i < n; i++) {
+        if(array[i] <= min) {
+            min = array[i];
+        }
+    }
+    return min;
+} 
+
+/* This function returns a dynamic allocated array with the following structure:
+    int *array = {sum, elem1, elem2, ..., elemN}
+
+    with:
+    sum = minimal sum of the matrix
+    elem1, elem2, ..., elemN = Elements that have been crossed by the algorithm (in order from the top)
+*/
+int * greedy(int matrix[][N]) {
+    int *array = malloc((N + 1) * sizeof(int));
+    int sum = 0;
+    int min_index = 0;
+
+    //Choose the lowest number from the top row
+    sum = min(matrix[0], N);
+    array[1] = sum; //First number encountered
+
+    /* 
+    Now we can go in 3 possible directions
+                       [ * n * ]
+                       [ x x x ]
+                       [ * * * ]
+    
+    with:
+    * -> random numbers
+    n -> already processed number
+    x -> possible future positions
+
+    Of course there can be exceptions like n being on the 1 column or last. So we have to check
+    out of bounds conditions
+
+    
+    */
+
+    int current_index = min_index;
+    for (int i = 1; i < N; i++) {
+        int min_value = matrix[i][current_index];
+        int min_offset = 0;
+
+        if (current_index > 0 && matrix[i][current_index - 1] < min_value) {
+            min_value = matrix[i][current_index - 1];
+            min_offset = -1;
+        }
+        if (current_index < N - 1 && matrix[i][current_index + 1] < min_value) {
+            min_value = matrix[i][current_index + 1];
+            min_offset = 1;
+        }
+
+        sum += min_value;
+        array[i + 1] = min_value;
+        current_index += min_offset;
+    }
+
+    // for(int i = 1; i < N; i++) {
+
+        
+    //     // General case (for now i will just choose the minimum number from the bottom line without
+    //     // it being on the 3 possible positions under the starting number)
+    //     int number = min(matrix[i], N);
+    //     sum += number;
+    //     array[i+1] = number;
+    // }
+
+    //Saving the final sum
+    array[0] = sum;
+    return array;
+    
+}
+
 int main(int argc, char *argv[]) {
 
     srand(time(NULL));
@@ -66,22 +147,35 @@ int main(int argc, char *argv[]) {
     fill_matrix(matrix);
     print_matrix(matrix);
     
-    // // Greedy
-    // if ((argv[1] == '0') {
-        
+    // Greedy
+    char algo = argv[1][0];
+    if (algo == '0') {
+        printf("\nStandard Greedy: \n\n");
+        int *array = greedy(matrix);
+        int final_sum = array[0];
+        printf("Lowest sum: %d \n", final_sum);
 
-    // }
+        printf("Path: { ");
+        for(int i = 0; i < N; i++) {
+            printf("%d, ", array[i+1]);
+        }
+        printf("}\n");
 
-    // // Greedy with hill climbing
-    // else if(rgv[1] == '1') {
+        return 0;
 
-    // }
+    }
 
-    // //Invalid character
-    // else {
-    //     printf("\nInvalid Argument. Exiting.");
-    //     return 1
-    // }
+    // Greedy with hill climbing
+    else if(algo == '1') {
+        printf("\nGreedy with hill climbing");
+        return 0;
+    }
+
+    //Invalid character
+    else {
+        printf("\nInvalid Argument. Exiting.");
+        return 1;
+    }
 
     return 0;
 
